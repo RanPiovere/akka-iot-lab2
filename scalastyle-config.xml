@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scalastyle commentFilter="enabled">
+  <name>Akka IoT Scalastyle configuration</name>
+  <check level="warning" class="org.scalastyle.file.FileLineLengthChecker" enabled="true">
+    <parameters><parameter name="maxLineLength"><![CDATA[120]]></parameter></parameters>
+  </check>
+  <check level="warning" class="org.scalastyle.scalariform.MagicNumberChecker" enabled="false"/>
+  <check level="warning" class="org.scalastyle.scalariform.NullChecker" enabled="true"/>
+  <check level="warning" class="org.scalastyle.scalariform.VarFieldChecker" enabled="true"/>
+  <check level="warning" class="org.scalastyle.scalariform.ReturnChecker" enabled="true"/>
+</scalastyle>

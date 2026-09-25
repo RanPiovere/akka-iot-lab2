@@ -1,0 +1,10 @@
+.git
+.idea
+.bsp
+.metals
+project/target
+target/streams
+target/scala-2.13/classes
+target/scala-2.13/test-classes
+target/test-reports
+*.log
