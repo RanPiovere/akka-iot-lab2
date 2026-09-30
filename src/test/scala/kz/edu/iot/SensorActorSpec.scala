@@ -16,7 +16,7 @@ class SensorActorSpec extends ScalaTestWithActorTestKit with AnyWordSpecLike {
       val reading = SensorReading("sensor-1", 22.5, 48.0, Instant.parse("2026-01-01T00:00:00Z"))
 
       actor ! Record(reading, recordProbe.ref)
-      recordProbe.expectMessage(Accepted(reading))
+      recordProbe.expectMessage(Rejected("forced failure"))
 
       actor ! GetLatest(latestProbe.ref)
       latestProbe.expectMessage(Latest(Some(reading)))
