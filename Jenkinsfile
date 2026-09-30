@@ -85,7 +85,9 @@ pipeline {
                                 checkout scm
 
                                 script {
-                                    runSbt("-Diot.profile=${PROFILE.toLowerCase()} test")
+                                    runSbt(
+                                        "-Diot.profile=${PROFILE.toLowerCase()} test"
+                                    )
                                 }
                             }
                         }
@@ -102,18 +104,33 @@ pipeline {
             steps {
                 script {
                     runSbt('assembly')
+                }
 
-                    def iotImage = docker.build(
-                        "${params.DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials-id',
+                        usernameVariable: 'DOCKERHUB_USER',
+                        passwordVariable: 'DOCKERHUB_TOKEN'
                     )
+                ]) {
+                    sh '''
+                        set -eu
 
-                    docker.withRegistry(
-                        'https://index.docker.io/v1/',
-                        'dockerhub-credentials-id'
-                    ) {
-                        iotImage.push()
-                        iotImage.push('latest')
-                    }
+                        echo "$DOCKERHUB_TOKEN" |
+                            docker login \
+                                --username "$DOCKERHUB_USER" \
+                                --password-stdin
+
+                        docker build \
+                            --tag "${DOCKER_IMAGE}:${BUILD_NUMBER}" \
+                            --tag "${DOCKER_IMAGE}:latest" \
+                            .
+
+                        docker push "${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                        docker push "${DOCKER_IMAGE}:latest"
+
+                        docker logout
+                    '''
                 }
             }
         }
@@ -153,18 +170,18 @@ def runSbt(String arguments) {
     if (isUnix()) {
         sh """
             sbt \
-            -Dsbt.server.autostart=false \
-            -Dsbt.supershell=false \
-            -Dakka.test.timefactor=${env.AKKA_TEST_TIMEFACTOR} \
-            ${arguments}
+                -Dsbt.server.autostart=false \
+                -Dsbt.supershell=false \
+                -Dakka.test.timefactor=${env.AKKA_TEST_TIMEFACTOR} \
+                ${arguments}
         """
     } else {
         bat """
             sbt ^
-            -Dsbt.server.autostart=false ^
-            -Dsbt.supershell=false ^
-            -Dakka.test.timefactor=${env.AKKA_TEST_TIMEFACTOR} ^
-            ${arguments}
+                -Dsbt.server.autostart=false ^
+                -Dsbt.supershell=false ^
+                -Dakka.test.timefactor=${env.AKKA_TEST_TIMEFACTOR} ^
+                ${arguments}
         """
     }
 }
